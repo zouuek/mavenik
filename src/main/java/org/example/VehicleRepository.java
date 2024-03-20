@@ -34,12 +34,12 @@ public class VehicleRepository implements IVehicleRepository {
         return this.vehicles;
     }
     public void save() throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter("xd.csv"));
+        BufferedWriter writer = new BufferedWriter(new FileWriter("C:\\Users\\miney\\IdeaProjects\\mavenik\\src\\main\\resources\\xd.csv"));
         writer.flush();
         writer.write("");
         for(Vehicle vehs : this.vehicles){
             writer.append(vehs.toCSV());
-            //writer.append(' ');
+            //writer.append(' '); xddd
         }
         writer.close();
     }
@@ -50,7 +50,7 @@ public class VehicleRepository implements IVehicleRepository {
 //    }
     public VehicleRepository(ArrayList<Vehicle> vehicles){
         this.vehicles = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("xd.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\miney\\IdeaProjects\\mavenik\\src\\main\\resources\\xd.csv"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 //System.out.println("test");
