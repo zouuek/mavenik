@@ -6,7 +6,7 @@ public abstract class Vehicle {
     public Integer year;
     public Integer price;
     public Boolean rented;
-    public Integer id;
+    public String plate;
     public String type;
 
     public String toCSV(){
@@ -16,7 +16,7 @@ public abstract class Vehicle {
                 + this.price + ";"
                 + this.rented + ";"
                 + this.type + ";"
-                + this.id + "\n";
+                + this.plate + "\n";
     }
     @Override
     public String toString(){
@@ -25,7 +25,7 @@ public abstract class Vehicle {
                 + this.year + " "
                 + this.price + " "
                 + this.rented + " "
-                + this.id + "\n";
+                + this.plate + "\n";
     }
 
 

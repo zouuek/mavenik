@@ -7,6 +7,10 @@ public class Main {
     public static void main(String[] args) throws IOException {
        // Car car = new Car("xd","xd",1000,100,1);
        VehicleRepository vehs = new VehicleRepository(new ArrayList<Vehicle>());
+       User user = new User("user", "pass", "user");
+       UserRepository userRepository = new UserRepository(new ArrayList<User>());
+
+
        //vehs.vehicles.add(car);
        //vehs.vehicles.add(car);
         //

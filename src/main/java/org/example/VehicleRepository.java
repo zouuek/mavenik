@@ -6,9 +6,9 @@ import java.util.ArrayList;
 public class VehicleRepository implements IVehicleRepository {
     ArrayList<Vehicle> vehicles;
     @Override
-    public void rentCar(Integer id) throws IOException {
+    public void rentCar(String plate) throws IOException {
        for(Vehicle vehs : this.vehicles){
-           if (vehs.id==id && !vehs.rented) vehs.rented = true;
+           if (vehs.plate.equals(plate) && !vehs.rented) vehs.rented = true;
        }
         try {
             save();
@@ -18,9 +18,9 @@ public class VehicleRepository implements IVehicleRepository {
     }
 
     @Override
-    public void returnCar(Integer id) throws IOException {
+    public void returnCar(String plate) throws IOException {
         for(Vehicle vehs : this.vehicles){
-            if (vehs.id==id && vehs.rented) vehs.rented = false;
+            if (vehs.plate.equals(plate) && vehs.rented) vehs.rented = false;
         }
         try {
             save();
@@ -39,38 +39,34 @@ public class VehicleRepository implements IVehicleRepository {
         writer.write("");
         for(Vehicle vehs : this.vehicles){
             writer.append(vehs.toCSV());
-            //writer.append(' '); xddd
         }
         writer.close();
     }
-
-//    public VehicleRepository(ArrayList<Vehicle> vehicles) {
-//        this.vehicles = new ArrayList<>();
-//
-//    }
     public VehicleRepository(ArrayList<Vehicle> vehicles){
-        this.vehicles = new ArrayList<>();
+        this.vehicles = vehicles;
         try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\miney\\IdeaProjects\\mavenik\\src\\main\\resources\\xd.csv"))) {
             String line;
             while ((line = br.readLine()) != null) {
-                //System.out.println("test");
                 String[] values = line.split(";");
                 if(values[5].equals("Car")){
-                    System.out.println("test");
                     Car car = new Car(
                             values[0],
                             values[1],
                             Integer.parseInt(values[2]),
                             Integer.parseInt(values[3]),
-                            Integer.parseInt((values[6])
-                            ));
+                            values[6]
+                            );
                     this.vehicles.add(car);
                     save();
                 }
                 else {
-                    //Motorcycle motorcycle = new Motorcycle(values[0], values[1], Integer.parseInt(values[2]), Integer.parseInt(values[3]), Integer.parseInt((values[7]), );
-                    Integer x = Integer.parseInt(values[7]);
-                    Motorcycle motorcycle = new Motorcycle(values[0],values[1],Integer.parseInt(values[2]),Integer.parseInt(values[3]),x, values[6]);
+                    Motorcycle motorcycle = new Motorcycle(
+                            values[0],
+                            values[1],
+                            Integer.parseInt(values[2]),
+                            Integer.parseInt(values[3]),
+                            values[7],
+                            values[6]);
                     this.vehicles.add(motorcycle);
                     save();
                 }
@@ -79,4 +75,41 @@ public class VehicleRepository implements IVehicleRepository {
             throw new RuntimeException(e);
         }
     }
+    @Override
+    public void addVehicle(Vehicle vehicle) throws IOException {
+        for (Vehicle vehs : this.vehicles){
+            if (vehs.plate.equals(vehicle.plate)) return;
+        }
+        this.vehicles.add(vehicle);
+        save();
+    }
+
+    @Override
+    public void removeVehicle(String plate) throws IOException {
+        for (Vehicle vehs : this.vehicles){
+            if (vehs.plate.equals(plate)) this.vehicles.remove(vehs);
+        }
+        save();
+    }
+
+    @Override
+    public Vehicle getVehicle(String plate) {
+        for (Vehicle vehs : this.vehicles){
+            if (vehs.plate.equals(plate)) return vehs;
+        }
+        return null;
+    }
+
+    public void userRentVehicle(User user, String plate){
+        for (Vehicle vehs : this.vehicles){
+            if (vehs.plate.equals(plate)) user.rentVehicle(vehs);
+        }
+    }
+    public void userDeRentVehicle(User user, String plate){
+        for (Vehicle vehs : this.vehicles){
+            if (vehs.plate.equals(plate)) user.deRentVehicle(vehs);
+        }
+    }
+
+
 }
