@@ -15,6 +15,7 @@ public class Authentication {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(";");
+                System.out.println(values[1]+ " " + DigestUtils.sha256Hex(password));
                 if (values[0].equals(login) && values[1].equals(DigestUtils.sha256Hex(password))) return true;
 
             }

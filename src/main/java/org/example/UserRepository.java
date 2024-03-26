@@ -18,7 +18,7 @@ public class UserRepository implements IUserRepository {
                             values[2]
                     );
                     this.users.add(user);
-                    save();
+                    //save();
                 }
 
             } catch (IOException ex) {
