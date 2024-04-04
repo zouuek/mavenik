@@ -1,38 +1,34 @@
 package org.example;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
-import javax.swing.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.SQLException;
+
 
 public class User {
     public String login;
-    public String  password;
-    public String role;
-    public Vehicle rentedVehicle;
+    public String password;
+    public Role role;
+    public String rentedVehicle;
 
-    public User(String login, String password, String role) {
+    public User(String login, String password, Role role) {
         this.login = login;
         this.password = password;
         this.role = role;
     }
+    public User(String login, String password, String role, String rentedVehicle) {
+        this.login = login;
+        this.password = password;
+        this.role = Role.valueOf(role.toUpperCase());
+        this.rentedVehicle = rentedVehicle;
+    }
 
-    public void rentVehicle(Vehicle veh){
-        veh.rented = true;
-        this.rentedVehicle = veh;
+    public void setRentedVehicle(String rentedVehicle){
+        this.rentedVehicle = rentedVehicle;
     }
-    public void deRentVehicle(Vehicle veh){
-        veh.rented = false;
-        this.rentedVehicle = null;
-    }
+
     public String toCSV(){
-        String encryptedPassword = DigestUtils.sha256Hex(this.password);
-        if(this.rentedVehicle != null) {
-            return this.login + ";" + encryptedPassword + ";" + this.role + ";" + this.rentedVehicle.plate;
-        }
-        else return this.login + ";" + encryptedPassword + ";" + this.role;
-
+        return this.login + ";" + this.password + ";" + this.role + ";" + this.rentedVehicle;
     }
 
     @Override
@@ -41,39 +37,40 @@ public class User {
                 "login='" + login + '\'' +
                 ", password='" + password + '\'' +
                 ", role='" + role + '\'' +
-                ", rentedVehicle=" + rentedVehicle.toString() +
+                ", rentedVehicle=" + rentedVehicle +
                 '}';
     }
 
-    public void addVehicle(VehicleRepository vehicleRepository, Vehicle vehicle) throws IOException {
-        if(this.role.equals("Admin")){
-            vehicleRepository.addVehicle(vehicle);
+    public void addVehicle(CsvVehicleRepository csvVehicleRepository, Vehicle vehicle) throws IOException {
+        if(this.role.name().equals("ADMIN")){
+            csvVehicleRepository.addVehicle(vehicle);
         }
         else System.out.println("Not enough permissions");
     }
-    public void delVehicle(VehicleRepository vehicleRepository, String plate) throws IOException {
-        if(this.role.equals("Admin")) {
-            for (Vehicle v : vehicleRepository.vehicles) {
+    public void delVehicle(CsvVehicleRepository csvVehicleRepository, String plate) throws IOException {
+        if(this.role.name().equals("ADMIN")) {
+            for (Vehicle v : csvVehicleRepository.vehicles) {
                 if (v.plate.equals(plate)) {
-                    vehicleRepository.removeVehicle(plate);
+                    csvVehicleRepository.removeVehicle(plate);
                 }
             }
         }
         else System.out.println("Not enough permissions");
     }
-    public boolean login(String password) throws FileNotFoundException {
-        Authentication auth = new Authentication();
-        return auth.checkForAuth(this.login,password);
-    }
-    public void adminBrowseUsers(UserRepository userRepository){
-        if(this.role.equals("Admin")) {
-            for (User usr : userRepository.users) {
+
+    public void adminBrowseUsers(CsvUserRepository csvUserRepository){
+        if(this.role.name().equals("ADMIN")) {
+            for (User usr : csvUserRepository.users) {
                 System.out.println(usr.toString());
             }
         }
     }
     public void userCheckSelf(){
         System.out.println(this.toString());
+    }
+
+    public enum Role{
+        USER,ADMIN;
     }
 
 }

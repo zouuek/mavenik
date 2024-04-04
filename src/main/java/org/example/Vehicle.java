@@ -16,7 +16,7 @@ public abstract class Vehicle {
                 + this.price + ";"
                 + this.rented + ";"
                 + this.type + ";"
-                + this.plate + "\n";
+                + this.plate;
     }
     @Override
     public String toString(){
@@ -25,7 +25,7 @@ public abstract class Vehicle {
                 + this.year + " "
                 + this.price + " "
                 + this.rented + " "
-                + this.plate + "\n";
+                + this.plate;
     }
 
 

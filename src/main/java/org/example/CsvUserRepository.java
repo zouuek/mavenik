@@ -1,13 +1,24 @@
 package org.example;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 import java.io.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class UserRepository implements IUserRepository {
+public class CsvUserRepository implements IUserRepository {
     public ArrayList<User> users;
+    private static CsvUserRepository instance;
 
-    public UserRepository(ArrayList<User> users) {
-        this.users = users;
+    public static CsvUserRepository getInstance(){
+        if(CsvUserRepository.instance == null){
+            instance = new CsvUserRepository();
+        }
+        return instance;
+    }
+
+    private CsvUserRepository() {
+        this.users = new ArrayList<User>();
         try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\miney\\IdeaProjects\\mavenik\\src\\main\\resources\\users.csv"))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -15,10 +26,9 @@ public class UserRepository implements IUserRepository {
                     User user = new User(
                             values[0],
                             values[1],
-                            values[2]
+                            User.Role.valueOf(values[2].toUpperCase())
                     );
                     this.users.add(user);
-                    //save();
                 }
 
             } catch (IOException ex) {
@@ -38,8 +48,24 @@ public class UserRepository implements IUserRepository {
         }
         return null;
     }
+    @Override
+    public void addUser(User user) throws IOException {
+        user.password = DigestUtils.sha256Hex(user.password);
+        this.users.add(user);
+        save();
+    }
 
     @Override
+    public  void removeUser(String login){
+        this.users.remove(this.getUser(login));
+        try {
+            save();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     public void save() throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter("C:\\Users\\miney\\IdeaProjects\\mavenik\\src\\main\\resources\\users.csv"));
         writer.flush();
@@ -50,10 +76,8 @@ public class UserRepository implements IUserRepository {
         }
         writer.close();
     }
-    void logIn(String login, String password) throws FileNotFoundException {
-        Authentication authentication = new Authentication();
-
-        if(authentication.checkForAuth(login,password)){
+    void logIn(String login, String password) throws FileNotFoundException, SQLException {
+        if(Authentication.checkForAuth(login,password)){
             System.out.println(login + " has logged in.\n");
 
         }

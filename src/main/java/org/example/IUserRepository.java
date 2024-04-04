@@ -1,10 +1,12 @@
 package org.example;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public interface IUserRepository {
-    public ArrayList<User> getUsers();
-    public User getUser(String login);
-    public void save() throws IOException;
+    ArrayList<User> getUsers();
+    User getUser(String login) throws SQLException;
+    void addUser(User user) throws IOException, SQLException;
+    void removeUser(String login) throws SQLException;
 }

@@ -3,27 +3,51 @@ package org.example;
 import java.io.*;
 import java.util.ArrayList;
 
-public class VehicleRepository implements IVehicleRepository {
-    ArrayList<Vehicle> vehicles;
+public class CsvVehicleRepository implements IVehicleRepository {
+    private static CsvVehicleRepository instance;
+    public ArrayList<Vehicle> vehicles;
+    public static CsvVehicleRepository getInstance(){
+        if(CsvVehicleRepository.instance == null){
+            instance = new CsvVehicleRepository();
+        }
+        return instance;
+    }
     @Override
-    public void rentCar(String plate) throws IOException {
-       for(Vehicle vehs : this.vehicles){
-           if (vehs.plate.equals(plate) && !vehs.rented) vehs.rented = true;
-       }
+    public boolean rentVehicle(String plate, String login) throws IOException {
+        Vehicle vehicle = this.getVehicle(plate);
+        CsvUserRepository csvUserRepository = CsvUserRepository.getInstance();
+        User user = csvUserRepository.getUser(login);
+
+        if(user.rentedVehicle == null && !vehicle.rented){
+           vehicle.rented = true;
+           user.setRentedVehicle(plate);
+
+        }
+        else return false;
         try {
             save();
+            csvUserRepository.save();
+            return true;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void returnCar(String plate) throws IOException {
-        for(Vehicle vehs : this.vehicles){
-            if (vehs.plate.equals(plate) && vehs.rented) vehs.rented = false;
+    public boolean returnVehicle(String plate, String login) throws IOException {
+        Vehicle vehicle = this.getVehicle(plate);
+        CsvUserRepository csvUserRepository = CsvUserRepository.getInstance();
+        User user = csvUserRepository.getUser(login);
+
+        if(user.rentedVehicle != null && vehicle.rented){
+            vehicle.rented = false;
+            user.rentedVehicle = null;
         }
+
         try {
             save();
+            csvUserRepository.save();
+            return true;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -42,13 +66,13 @@ public class VehicleRepository implements IVehicleRepository {
         }
         writer.close();
     }
-    public VehicleRepository(ArrayList<Vehicle> vehicles){
-        this.vehicles = vehicles;
+    public CsvVehicleRepository(){
+        this.vehicles = new ArrayList<Vehicle>();
         try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\miney\\IdeaProjects\\mavenik\\src\\main\\resources\\xd.csv"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(";");
-                if(values[5].equals("Car")){
+                if(values.length > 1 && values[5].equals("Car")){   // nie wiem czemu sie tak buguje
                     Car car = new Car(
                             values[0],
                             values[1],
@@ -59,7 +83,7 @@ public class VehicleRepository implements IVehicleRepository {
                     this.vehicles.add(car);
                     save();
                 }
-                else {
+                else if (values.length > 1){
                     Motorcycle motorcycle = new Motorcycle(
                             values[0],
                             values[1],
@@ -100,16 +124,7 @@ public class VehicleRepository implements IVehicleRepository {
         return null;
     }
 
-    public void userRentVehicle(User user, String plate){
-        for (Vehicle vehs : this.vehicles){
-            if (vehs.plate.equals(plate)) user.rentVehicle(vehs);
-        }
-    }
-    public void userDeRentVehicle(User user, String plate){
-        for (Vehicle vehs : this.vehicles){
-            if (vehs.plate.equals(plate)) user.deRentVehicle(vehs);
-        }
-    }
+
 
 
 }
