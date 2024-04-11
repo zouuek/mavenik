@@ -1,8 +1,8 @@
-package org.example.jdbc;
+package org.example.dao.jdbc;
 
-import org.example.Authentication;
-import org.example.IUserRepository;
-import org.example.User;
+import org.example.utility.Authentication;
+import org.example.dao.IUserRepository;
+import org.example.model.User;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class JdbcUserRepository implements IUserRepository {
         PreparedStatement preparedStatement = connection.prepareStatement(ADD_USER_SQL);
         preparedStatement.setString(1, user.login);
         preparedStatement.setString(2, Authentication.hashPassword(user.password));
-        preparedStatement.setString(3, user.rentedVehicle);
+        preparedStatement.setString(3, user.rentedVehicle.plate);
         preparedStatement.setString(4, user.role.name());
         int changed = preparedStatement.executeUpdate();
         if (changed  > 0) {
@@ -92,8 +92,8 @@ public class JdbcUserRepository implements IUserRepository {
     }
 
     @Override
-    public ArrayList<User> getUsers() {
-        ArrayList<User> users = new ArrayList<>();
+    public Collection<User> getUsers() {
+        Collection<User> users = new ArrayList<>();
         try(Connection connection = databaseManager.getConnection();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(GET_ALL_USERS_SQL)) {

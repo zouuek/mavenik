@@ -1,14 +1,10 @@
-package org.example;
+package org.example.utility;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.example.jdbc.JdbcUserRepository;
+import org.example.dao.jdbc.JdbcUserRepository;
+import org.example.model.User;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 public class Authentication {
 

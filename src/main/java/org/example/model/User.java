@@ -1,15 +1,23 @@
-package org.example;
+package org.example.model;
 
-import java.io.FileNotFoundException;
+import jakarta.persistence.*;
+import org.example.dao.csv.CsvUserRepository;
+import org.example.dao.csv.CsvVehicleRepository;
+
 import java.io.IOException;
-import java.sql.SQLException;
 
-
+@Entity
+@Table(name = "tuser")
 public class User {
+    @Id
     public String login;
     public String password;
+    @Enumerated(EnumType.STRING)
     public Role role;
-    public String rentedVehicle;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "rentedplate", referencedColumnName = "plate")
+    public Vehicle rentedVehicle;
+    //public String rentedVehicle;
 
     public User(String login, String password, Role role) {
         this.login = login;
@@ -20,10 +28,12 @@ public class User {
         this.login = login;
         this.password = password;
         this.role = Role.valueOf(role.toUpperCase());
-        this.rentedVehicle = rentedVehicle;
+        this.rentedVehicle = new Car("def","def",0,0,rentedVehicle); // xd xd dx
+        //rentedVehicle.plate = rentedVehicle;
     }
+    public User(){}
 
-    public void setRentedVehicle(String rentedVehicle){
+    public void setRentedVehicle(Vehicle rentedVehicle){
         this.rentedVehicle = rentedVehicle;
     }
 

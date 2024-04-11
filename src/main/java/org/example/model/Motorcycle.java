@@ -1,5 +1,10 @@
-package org.example;
+package org.example.model;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("MOTORCYCLE")
 public class Motorcycle extends Vehicle {
     public String category;
 @Override
@@ -8,7 +13,7 @@ public class Motorcycle extends Vehicle {
             this.model + " " +
             this.year + " " +
             this.price + " " +
-            this.rented + " " +
+            this.rent + " " +
             this.plate + " " +
             this.category + "\n";
 }
@@ -18,8 +23,8 @@ public class Motorcycle extends Vehicle {
             this.model + ";" +
             this.year + ";"+
             this.price + ";" +
-            this.rented + ";" +
-            this.type + ";" +
+            this.rent + ";" +
+            Object.class.getSimpleName() + ";" +
             this.category + ";" +
             this.plate+ "\n";
 }
@@ -28,9 +33,10 @@ public class Motorcycle extends Vehicle {
         this.model = model;
         this.year = year;
         this.price = price;
-        this.rented = false;
+        this.rent = false;
         this.plate = plate;
-        this.type = this.getClass().getSimpleName();
+        //this.vehicle_type = this.getClass().getSimpleName();
         this.category = category;
     }
+    public Motorcycle(){}
 }

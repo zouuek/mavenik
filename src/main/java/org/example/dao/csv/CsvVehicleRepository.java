@@ -1,7 +1,14 @@
-package org.example;
+package org.example.dao.csv;
+
+import org.example.dao.IVehicleRepository;
+import org.example.model.Car;
+import org.example.model.Motorcycle;
+import org.example.model.User;
+import org.example.model.Vehicle;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class CsvVehicleRepository implements IVehicleRepository {
     private static CsvVehicleRepository instance;
@@ -17,10 +24,11 @@ public class CsvVehicleRepository implements IVehicleRepository {
         Vehicle vehicle = this.getVehicle(plate);
         CsvUserRepository csvUserRepository = CsvUserRepository.getInstance();
         User user = csvUserRepository.getUser(login);
+        CsvVehicleRepository csvVehicleRepository = CsvVehicleRepository.getInstance();
 
-        if(user.rentedVehicle == null && !vehicle.rented){
-           vehicle.rented = true;
-           user.setRentedVehicle(plate);
+        if(user.rentedVehicle == null && !vehicle.rent){
+           vehicle.rent = true;
+           user.setRentedVehicle(csvVehicleRepository.getVehicle(plate));
 
         }
         else return false;
@@ -39,8 +47,8 @@ public class CsvVehicleRepository implements IVehicleRepository {
         CsvUserRepository csvUserRepository = CsvUserRepository.getInstance();
         User user = csvUserRepository.getUser(login);
 
-        if(user.rentedVehicle != null && vehicle.rented){
-            vehicle.rented = false;
+        if(user.rentedVehicle != null && vehicle.rent){
+            vehicle.rent = false;
             user.rentedVehicle = null;
         }
 
@@ -54,7 +62,7 @@ public class CsvVehicleRepository implements IVehicleRepository {
     }
 
     @Override
-    public ArrayList<Vehicle> getVehicles() {
+    public Collection<Vehicle> getVehicles() {
         return this.vehicles;
     }
     public void save() throws IOException {

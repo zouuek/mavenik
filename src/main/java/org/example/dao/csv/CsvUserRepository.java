@@ -1,10 +1,14 @@
-package org.example;
+package org.example.dao.csv;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.example.utility.Authentication;
+import org.example.dao.IUserRepository;
+import org.example.model.User;
 
 import java.io.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class CsvUserRepository implements IUserRepository {
     public ArrayList<User> users;
@@ -26,7 +30,8 @@ public class CsvUserRepository implements IUserRepository {
                     User user = new User(
                             values[0],
                             values[1],
-                            User.Role.valueOf(values[2].toUpperCase())
+                            values[2].toUpperCase(),
+                            values[3]
                     );
                     this.users.add(user);
                 }
@@ -37,7 +42,7 @@ public class CsvUserRepository implements IUserRepository {
     }
 
     @Override
-    public ArrayList<User> getUsers() {
+    public Collection<User> getUsers() {
         return this.users;
     }
 

@@ -1,9 +1,9 @@
-package org.example.jdbc;
+package org.example.dao.jdbc;
 
-import org.example.IVehicleRepository;
-import org.example.Car;
-import org.example.Motorcycle;
-import org.example.Vehicle;
+import org.example.dao.IVehicleRepository;
+import org.example.model.Car;
+import org.example.model.Motorcycle;
+import org.example.model.Vehicle;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -16,8 +16,8 @@ public class JdbcVehicleRepository implements IVehicleRepository {
     private final  String GET_VEHICLE_SQL = "SELECT * FROM tvehicle WHERE plate LIKE ?";
     private final String RENT_CAR_SQL = "UPDATE tvehicle SET rent = 1 WHERE plate LIKE ? AND rent = 0";
     private final  String RENT_UPDATE_USER_SQL = "UPDATE tuser SET rentedplate = ? WHERE login LIKE ? AND rentedplate IS NULL";
-    private final String INSERT_SQL = "INSERT INTO tvehicle (brand, model, year, price, plate) VALUES (?,?,?,?,?)";
-    private final String INSERT_SQL_MOTOR = "INSERT INTO tvehicle (brand, model, year, price, plate, category) VALUES (?,?,?,?,?,?)";
+    private final String INSERT_SQL = "INSERT INTO tvehicle (brand, model, year, price, plate, vehicle_type) VALUES (?,?,?,?,?,?)";
+    private final String INSERT_SQL_MOTOR = "INSERT INTO tvehicle (brand, model, year, price, plate, category, vehicle_type) VALUES (?,?,?,?,?,?,?)";
     private final String RETURN_CAR_SQL = "UPDATE tvehicle SET rent = 0 WHERE plate LIKE ? AND rent = 1";
     private final  String RETURN_UPDATE_USER_SQL = "UPDATE tuser SET rentedplate = null WHERE login LIKE ? AND rentedplate LIKE ?";
     private final String REMOVE_VEHICLE_SQL = "DELETE FROM tvehicle WHERE plate LIKE ?";
@@ -85,7 +85,7 @@ public class JdbcVehicleRepository implements IVehicleRepository {
         Connection connection = manager.getConnection();
         connection.setAutoCommit(false);
         JdbcUserRepository jur = JdbcUserRepository.getInstance();
-        if(getVehicle(plate).rented && jur.getUser(login).rentedVehicle.equals(plate)) {
+        if(getVehicle(plate).rent && jur.getUser(login).rentedVehicle.plate.equals(plate)) {
             PreparedStatement preparedStatement = connection.prepareStatement(RETURN_CAR_SQL);
             preparedStatement.setString(1,plate);
             int check = preparedStatement.executeUpdate();
@@ -116,15 +116,16 @@ public class JdbcVehicleRepository implements IVehicleRepository {
 
     @Override
     public void addVehicle(Vehicle vehicle) {
-        if(vehicle.type.equals("Car")) {
-            try (Connection conn = manager.getConnection();
-                 PreparedStatement stmt = conn.prepareStatement(INSERT_SQL)) {
+        if(vehicle.getClass().getSimpleName().equals("Car")) {
+            try (Connection conn = manager.getConnection()){
+                PreparedStatement stmt = conn.prepareStatement(INSERT_SQL);
 
                 stmt.setString(1, vehicle.brand);
                 stmt.setString(2, vehicle.model);
                 stmt.setInt(3, vehicle.year);
                 stmt.setInt(4, vehicle.price);
                 stmt.setString(5, vehicle.plate);
+                stmt.setString(6,vehicle.getClass().getSimpleName().toUpperCase());
 
                 int changed = stmt.executeUpdate();
 
@@ -139,9 +140,9 @@ public class JdbcVehicleRepository implements IVehicleRepository {
             }
             //return false;
         }
-        else if(vehicle.type.equals("Motorcycle")){
-            try (Connection conn = manager.getConnection();
-                 PreparedStatement stmt = conn.prepareStatement(INSERT_SQL_MOTOR)) {
+        else if(vehicle.getClass().getSimpleName().equals("Motorcycle")){
+            try (Connection conn = manager.getConnection()){
+                 PreparedStatement stmt = conn.prepareStatement(INSERT_SQL_MOTOR);
 
                 stmt.setString(1, vehicle.brand);
                 stmt.setString(2, vehicle.model);
@@ -149,6 +150,7 @@ public class JdbcVehicleRepository implements IVehicleRepository {
                 stmt.setInt(4, vehicle.price);
                 stmt.setString(5, vehicle.plate);
                 stmt.setString(6, ((Motorcycle) vehicle).category);
+                stmt.setString(7, vehicle.getClass().getSimpleName().toUpperCase());
 
                 int changed = stmt.executeUpdate();
 
@@ -170,7 +172,7 @@ public class JdbcVehicleRepository implements IVehicleRepository {
         Connection connection = manager.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(REMOVE_VEHICLE_SQL);
         preparedStatement.setString(1,plate);
-        if(!getVehicle(plate).rented) {
+        if(!getVehicle(plate).rent) {
             int changed = preparedStatement.executeUpdate();
 
             if (changed > 0) {
@@ -197,12 +199,18 @@ public class JdbcVehicleRepository implements IVehicleRepository {
         int year = rs.getInt("year");
         int price = rs.getInt("price");
         boolean rent = rs.getBoolean("rent");
+        String type = rs.getString("vehicle_type");
+
         if ( category!=null){
             v = new Motorcycle(brand,model,year,price,plate,category);
         }else{
             v = new Car(brand,model,year,price,plate);
         }
-        v.rented = rent;
+        v.rent = rent;
+
+        rs.close();
+        preparedStatement.close();
+        connection.close();
         return v;
 
 
@@ -210,9 +218,9 @@ public class JdbcVehicleRepository implements IVehicleRepository {
     }
 
     @Override
-    public ArrayList<Vehicle> getVehicles() {
+    public Collection<Vehicle> getVehicles() {
 
-        ArrayList<Vehicle> vehicles = new ArrayList<>();
+        Collection<Vehicle> vehicles = new ArrayList<>();
         Connection connection = null;
         ResultSet rs = null;
         try {
@@ -228,6 +236,7 @@ public class JdbcVehicleRepository implements IVehicleRepository {
                 int year = rs.getInt("year");
                 int price = rs.getInt("price");
                 boolean rent = rs.getBoolean("rent");
+                String type = rs.getString("vehicle_type");
                 if ( category!=null){
                     //Motorcycle(String brand, String model, int year, double price, String plate, String category)
                     v = new Motorcycle(brand,model,year,price,plate,category);
@@ -235,7 +244,7 @@ public class JdbcVehicleRepository implements IVehicleRepository {
                 }else{
                     v = new Car(brand,model,year,price,plate);
                 }
-                v.rented = rent;
+                v.rent = rent;
                 vehicles.add(v);
             }
         }catch (SQLException e){
