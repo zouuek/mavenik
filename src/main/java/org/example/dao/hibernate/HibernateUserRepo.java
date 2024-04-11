@@ -19,7 +19,6 @@ public class HibernateUserRepo implements IUserRepository {
         //Transaction transaction = null;
         user = session.get(User.class, login);
         session.close();
-        //TODO: Finish this method
         return user;
     }
 
